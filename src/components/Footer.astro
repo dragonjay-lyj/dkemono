@@ -1,0 +1,50 @@
+---
+interface Props {
+  email?: string; // 可选的邮箱地址，默认为示例邮箱
+  statusLink?: string; // 可选的状态页面链接，默认为/status
+}
+
+const { email = 'your-email@example.com', statusLink = '/status' } = Astro.props;
+---
+
+<footer
+  class="mt-12 p-3 xs:p-4 md:p-6 bg-gradient-to-r from-gray-100 to-gray-200 text-center shadow-md transition-all duration-300 will-change-transform"
+  role="contentinfo"
+  aria-label="Footer with contact information and status page link"
+  tabindex="0"
+>
+  <div class="container mx-auto flex flex-col items-center">
+    <!-- 邮箱联系方式，响应式文本大小，添加图标 -->
+    <p class="text-gray-700 text-xs xs:text-sm md:text-base break-words mb-2 md:mb-3 flex items-center justify-center">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 xs:h-5 xs:w-5 md:h-6 md:w-6 text-gray-600 mr-1 xs:mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8a3 3 0 013-3h12a3 3 0 013 3v8a3 3 0 01-3 3H6a3 3 0 01-3-3V8z" />
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8" />
+      </svg>
+      Contact: <a href={`mailto:${email}`} class="text-gray-800 hover:text-blue-600 transition-colors duration-300 focus:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 ml-1 xs:ml-2" aria-label={`Send email to ${email}`}>{email}</a>
+    </p>
+    <!-- 状态页面链接，响应式文本大小，添加图标和悬停动画 -->
+    <a
+      href={statusLink}
+      class="relative text-blue-500 text-xs xs:text-sm md:text-base inline-flex items-center mt-1 md:mt-2 px-2 xs:px-3 py-0.5 xs:py-1 rounded-md overflow-hidden transition-all duration-300 hover:text-blue-700 focus:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+      aria-label="Navigate to status page"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 xs:h-5 xs:w-5 md:h-6 md:w-6 text-blue-500 mr-1 xs:mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2-2 4 4M9 12l2 2 4-4" />
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12a9 9 0 1118 0 9 9 0 01-18 0z" />
+      </svg>
+      Status Page
+      <!-- 悬停下划线动画效果，优化性能使用简单过渡 -->
+      <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-700 transition-all duration-300 hover:w-full focus:w-full"></span>
+    </a>
+  </div>
+</footer>
+
+<!-- 自定义样式组，增强交互性，优化性能减少不必要动画 -->
+<style>
+  footer:hover a span {
+    width: 100%;
+  }
+  footer:focus-within a span {
+    width: 100%;
+  }
+</style>

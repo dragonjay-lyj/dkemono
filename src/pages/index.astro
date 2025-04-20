@@ -1,11 +1,90 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
+import MainLayout from '../layouts/Layout.astro';
+import ArtistCard from '../components/ArtistCard.astro';
+import SearchBar from '../components/SearchBar';
+import Pagination from '../components/Pagination';
+import { getCollection } from 'astro:content';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+const artists = await getCollection('artists');
+const pageSize = 10;
+const totalPages = Math.ceil(artists.length / pageSize);
 ---
 
-<Layout>
-	<Welcome />
-</Layout>
+<MainLayout title="Artist Gallery | Home" description="Explore artists and their works from Patreon, Fanbox, and Gumroad.">
+  <!-- 欢迎信息区域，响应式字体大小，添加渐显动画 -->
+  <div class="text-center mb-4 xs:mb-6 sm:mb-8 animate-fade-in-down">
+    <h1 class="text-lg xs:text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-800 mb-1 xs:mb-2 sm:mb-3" id="main-heading">
+      Artist Gallery
+    </h1>
+    <p class="text-xs xs:text-sm sm:text-base md:text-lg text-gray-600 max-w-2xl mx-auto">
+      Discover talented artists and their amazing works from platforms like Patreon, Fanbox, and Gumroad.
+    </p>
+  </div>
+  <!-- 搜索栏，添加渐显动画，未来可实现动态数据交互 -->
+  <div class="mb-3 xs:mb-4 sm:mb-6 animate-fade-in">
+    <SearchBar initialData={artists} client:visible />
+    <!-- 注意：当前SearchBar仅更新本地状态，页面数据不会自动更新 -->
+    <!-- 可通过Astro端点API（如/api/search.json.ts）实现动态搜索，需在SearchBar组件中添加fetch逻辑 -->
+  </div>
+  <!-- 分页组件，添加渐显动画，未来可实现动态数据交互 -->
+  <div class="mb-3 xs:mb-4 sm:mb-6 animate-fade-in">
+    <Pagination totalPages={totalPages} client:only />
+    <!-- 注意：当前Pagination仅更新本地状态，页面数据不会自动切片 -->
+    <!-- 可通过前端状态管理（如React Context）或Astro端点API实现动态分页 -->
+  </div>
+  <!-- 艺术家卡片网格，响应式列数，添加渐显动画 -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 xs:gap-4 sm:gap-5 md:gap-6 animate-fade-in" role="grid" aria-label="Artist cards">
+    {artists.length > 0 ? (
+      artists.slice(0, pageSize).map((artist, index) => (
+        <!-- 卡片逐个加载动画，延迟基于索引以避免初始加载卡顿 -->
+        <div class="artist-card-item" style={`animation-delay: ${index * 0.05}s`}>
+          <ArtistCard
+            name={artist.data.name}
+            avatar={artist.data.avatar}
+            cover={artist.data.cover}
+            service={artist.data.service}
+            slug={artist.slug}
+          />
+        </div>
+      ))
+    ) : (
+      <p class="text-center text-gray-500 text-xs xs:text-sm sm:text-base col-span-full">No artists found.</p>
+    )}
+  </div>
+  <!-- 分页组件，添加渐显动画 -->
+  <div class="mt-3 xs:mt-4 sm:mt-6 animate-fade-in">
+    <Pagination totalPages={totalPages} client:only />
+  </div>
+</MainLayout>
+
+<!-- 自定义样式，添加渐显和向下移动动画，优化性能减少动画复杂度 -->
+<style>
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes fade-in-down {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .animate-fade-in {
+    animation: fade-in 0.6s ease-out forwards;
+  }
+  .animate-fade-in-down {
+    animation: fade-in-down 0.6s ease-out forwards;
+  }
+  .artist-card-item {
+    opacity: 0;
+    animation: fade-in 0.5s ease-out forwards;
+  }
+</style>

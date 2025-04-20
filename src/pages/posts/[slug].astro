@@ -1,0 +1,149 @@
+---
+import MainLayout from '../../layouts/Layout.astro';
+import ArtistCardDetail from '../../components/ArtistCardDetail.astro';
+import PostCard from '../../components/PostCard.astro';
+import TwikooComments from '../../components/TwikooComments.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('posts');
+  return posts.map(post => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const artists = await getCollection('artists');
+const artist = artists.find(a => a.data.name === post.data.artist);
+const allPosts = await getCollection('posts', ({ data }) => data.artist === post.data.artist);
+const currentIndex = allPosts.findIndex(p => p.slug === post.slug);
+const prevPost = currentIndex > 0 ? allPosts[currentIndex - 1] : null;
+const nextPost = currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : null;
+// 获取相关帖子推荐（例如，前3个非当前帖子）
+const relatedPosts = allPosts
+  .filter(p => p.slug !== post.slug)
+  .slice(0, 3);
+const { Content } = await post.render();
+export const prerender = true;
+---
+
+<MainLayout
+  title={`Post | ${post.data.title}`}
+  description={`View ${post.data.title} by ${post.data.artist}.`}
+>
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "CreativeWork",
+      "name": "${post.data.title}",
+      "author": {
+        "@type": "Person",
+        "name": "${post.data.artist}"
+      },
+      "datePublished": "${post.data.publishDate.toISOString()}",
+      "image": "${post.data.cover}"
+    }
+  </script>
+  <!-- 导航区域，响应式布局，添加渐显动画 -->
+  <div class="flex flex-col sm:flex-row justify-between mb-3 xs:mb-4 sm:mb-6 gap-2 sm:gap-0 animate-fade-in" role="navigation" aria-label="Post navigation">
+    {prevPost ? (
+      <a
+        href={`/posts/${prevPost.slug}`}
+        class="text-blue-500 hover:text-blue-700 transition-all duration-300 focus:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 px-2 py-1 rounded-md hover:scale-105 focus:scale-105 text-sm sm:text-base"
+        aria-label="Previous post"
+        tabindex={0}
+      >
+        上一页
+      </a>
+    ) : (
+      <span class="text-gray-400 text-sm sm:text-base" aria-hidden="true">上一页</span>
+    )}
+    {artist ? (
+      <a
+        href={`/artists/${artist.slug}`}
+        class="text-green-500 hover:text-green-700 transition-all duration-300 focus:text-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 px-2 py-1 rounded-md hover:scale-105 focus:scale-105 text-sm sm:text-base"
+        aria-label="Back to artist profile"
+        tabindex={0}
+      >
+        返回艺术家
+      </a>
+    ) : (
+      <span class="text-gray-400 text-sm sm:text-base" aria-hidden="true">返回艺术家</span>
+    )}
+    {nextPost ? (
+      <a
+        href={`/posts/${nextPost.slug}`}
+        class="text-blue-500 hover:text-blue-700 transition-all duration-300 focus:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 px-2 py-1 rounded-md hover:scale-105 focus:scale-105 text-sm sm:text-base"
+        aria-label="Next post"
+        tabindex={0}
+      >
+        下一页
+      </a>
+    ) : (
+      <span class="text-gray-400 text-sm sm:text-base" aria-hidden="true">下一页</span>
+    )}
+  </div>
+  <!-- 艺术家详情卡片，添加渐显动画 -->
+  <div class="mb-3 xs:mb-4 sm:mb-6 animate-fade-in">
+    {artist ? (
+      <ArtistCardDetail
+        name={artist.data.name}
+        avatar={artist.data.avatar}
+        cover={artist.data.cover}
+        title={post.data.title}
+        publishDate={post.data.publishDate}
+        tags={post.data.tags}
+      />
+    ) : (
+      <p class="text-red-500 text-xs xs:text-sm sm:text-base mb-3 xs:mb-4 sm:mb-6">未找到艺术家信息。</p>
+    )}
+  </div>
+  <!-- 帖子内容区域，响应式字体大小，添加渐显动画 -->
+  <div class="mt-3 xs:mt-4 sm:mt-6 prose max-w-none text-xs xs:text-sm sm:text-base md:text-lg text-gray-800 animate-fade-in" role="article" aria-label="Post content">
+    <Content />
+  </div>
+  <!-- 评论区域，响应式字体大小，添加渐显动画 -->
+  <div class="mt-4 xs:mt-6 sm:mt-8 animate-fade-in">
+    <h3 class="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-gray-800 mb-1 xs:mb-2 sm:mb-3">评论</h3>
+    <TwikooComments envId="https://superlative-valkyrie-233b02.netlify.app/.netlify/functions/twikoo" lang="zh-CN" />
+  </div>
+  <!-- 相关帖子推荐区域，响应式网格布局，添加渐显动画 -->
+  {relatedPosts.length > 0 && (
+    <div class="mt-6 xs:mt-8 sm:mt-10 animate-fade-in">
+      <h3 class="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-gray-800 mb-1 xs:mb-2 sm:mb-3">相关帖子</h3>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 xs:gap-4 sm:gap-5" role="grid" aria-label="Related posts by the same artist">
+        {relatedPosts.map((relatedPost, index) => (
+          <div class="related-post-item" style={`animation-delay: ${index * 0.1}s`}>
+            <PostCard
+              title={relatedPost.data.title}
+              cover={relatedPost.data.cover}
+              publishDate={relatedPost.data.publishDate}
+              attachments={relatedPost.data.attachments}
+              slug={relatedPost.slug}
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  )}
+</MainLayout>
+
+<!-- 自定义样式，添加渐显动画，优化性能减少动画复杂度 -->
+<style>
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  .animate-fade-in {
+    animation: fade-in 0.6s ease-out forwards;
+  }
+  .related-post-item {
+    opacity: 0;
+    animation: fade-in 0.5s ease-out forwards;
+  }
+</style>
