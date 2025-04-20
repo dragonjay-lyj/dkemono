@@ -50,17 +50,15 @@ export const prerender = true;
   <!-- 搜索栏，添加渐显动画，未来可实现动态数据交互 -->
   <div class="mb-3 xs:mb-4 sm:mb-6 animate-fade-in">
     <SearchBar initialData={[]} client:visible />
-    <!-- 注意：当前SearchBar仅更新本地状态，页面数据不会自动更新 -->
-    <!-- 可通过Astro端点API（如/api/search.json.ts）实现动态搜索，需在SearchBar组件中添加fetch逻辑 -->
+    <!-- 注意：当前SearchBar通过全局事件更新页面数据 -->
   </div>
-  <!-- 分页组件，添加渐显动画，未来可实现动态数据交互 -->
-  <div class="mb-3 xs:mb-4 sm:mb-6 animate-fade-in">
+  <!-- 分页组件，添加渐显动画 -->
+  <div class="mb-3 xs:mb-4 sm:mb-6 animate-fade-in" id="pagination-top">
     <Pagination totalPages={totalPages} client:only />
-    <!-- 注意：当前Pagination仅更新本地状态，页面数据不会自动切片 -->
-    <!-- 可通过前端状态管理（如React Context）或Astro端点API实现动态分页 -->
+    <!-- 注意：Pagination组件通过前端状态管理实现动态分页 -->
   </div>
-  <!-- 帖子卡片网格，响应式列数，添加渐显动画 -->
-  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 xs:gap-4 sm:gap-5 md:gap-6 animate-fade-in" role="grid" aria-label="Post cards for artist works">
+  <!-- 帖子卡片网格，响应式列数，添加渐显动画，动态切片数据 -->
+  <div id="posts-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 xs:gap-4 sm:gap-5 md:gap-6 animate-fade-in" role="grid" aria-label="Post cards for artist works">
     {posts.length > 0 ? (
       posts.slice(0, pageSize).map((post, index) => (
         <div class="post-card-item" style={`animation-delay: ${index * 0.05}s`}>
@@ -78,7 +76,7 @@ export const prerender = true;
     )}
   </div>
   <!-- 分页组件，添加渐显动画 -->
-  <div class="mt-3 xs:mt-4 sm:mt-6 animate-fade-in">
+  <div class="mt-3 xs:mt-4 sm:mt-6 animate-fade-in" id="pagination-bottom">
     <Pagination totalPages={totalPages} client:only />
   </div>
 </MainLayout>
@@ -113,4 +111,118 @@ export const prerender = true;
     opacity: 0;
     animation: fade-in 0.5s ease-out forwards;
   }
+  /* 在低性能设备上禁用动画以提升性能 */
+  @media (prefers-reduced-motion: reduce) {
+    .animate-fade-in, .animate-fade-in-down, .post-card-item {
+      animation: none;
+      opacity: 1;
+    }
+  }
 </style>
+
+<!-- 动态分页和搜索过滤脚本，前端状态管理实现数据切片和过滤 -->
+<script define:vars={{ posts, pageSize }}>
+  // 全局变量存储当前页和过滤后的帖子数据
+  let currentPage = 1;
+  let filteredPosts = [...posts];
+  let totalPages = Math.ceil(filteredPosts.length / pageSize);
+
+  // 动态分页更新函数
+  window.updatePage = function(page) {
+    if (page < 1 || page > totalPages) {
+      console.error('Invalid page number:', page);
+      return;
+    }
+    currentPage = page;
+    const startIndex = (page - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    const postsGrid = document.getElementById('posts-grid');
+    if (postsGrid) {
+      postsGrid.innerHTML = ''; // 清空当前内容
+      const postsToDisplay = filteredPosts.slice(startIndex, endIndex);
+      if (postsToDisplay.length > 0) {
+        postsToDisplay.forEach((post, index) => {
+          const postItem = document.createElement('div');
+          postItem.className = 'post-card-item';
+          postItem.style.animationDelay = `${index * 0.05}s`;
+          // 动态渲染PostCard组件内容（需与PostCard.astro组件一致）
+          const publishDate = post.data.publishDate ? new Date(post.data.publishDate).toLocaleDateString() : 'N/A';
+          const attachments = post.data.attachments >= 0 ? post.data.attachments : 'N/A';
+          const title = post.data.title || 'Untitled Post';
+          const cover = post.data.cover || '/images/default-cover.jpg';
+          postItem.innerHTML = `
+            <a href="/posts/${post.slug}" class="relative block rounded-xl overflow-hidden shadow-lg group transition-transform hover:scale-105 duration-300">
+              <div class="absolute inset-0 bg-gradient-to-t from-gray-900/80 to-transparent opacity-70 z-10"></div>
+              <img src="${cover}" alt="${title} cover image" class="w-full h-64 object-cover" loading="lazy" decoding="async" />
+              <div class="absolute top-0 left-0 p-4 z-20">
+                <h3 class="text-white text-lg font-bold line-clamp-2">${title}</h3>
+              </div>
+              <div class="absolute bottom-0 left-0 p-4 z-20">
+                <p class="text-white text-sm">Published: ${publishDate}</p>
+                <p class="text-white text-sm">Attachments: ${attachments}</p>
+              </div>
+            </a>
+          `;
+          postsGrid.appendChild(postItem);
+        });
+      } else {
+        postsGrid.innerHTML = '<p class="text-center text-gray-500 col-span-full">No posts found after filtering.</p>';
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      console.error('Posts grid element not found.');
+    }
+  };
+
+  // 更新分页组件的总页数
+  window.updatePagination = function(newTotalPages) {
+    totalPages = newTotalPages;
+    // 触发事件通知Pagination组件更新totalPages
+    window.dispatchEvent(new CustomEvent('updateTotalPages', { detail: { totalPages: newTotalPages } }));
+    // 如果当前页超出新总页数范围，则调整到最后一页
+    if (currentPage > totalPages) {
+      currentPage = totalPages || 1;
+      window.updatePage(currentPage);
+    }
+  };
+
+  // 监听搜索过滤事件，更新filteredPosts并重置分页
+  window.addEventListener('searchFilterChange', (event) => {
+    const { query } = event.detail;
+    let result = [...posts];
+    if (query) {
+      result = result.filter(post =>
+        post.data.title.toLowerCase().includes(query.toLowerCase())
+      );
+    }
+    // 服务过滤在艺术家详情页可能不适用，因为所有帖子都属于同一艺术家
+    // 如果需要服务过滤，可通过艺术家数据关联，此处忽略service字段
+    const sortBy = event.detail.sortBy;
+    if (sortBy === 'publishDate') {
+      result.sort((a, b) => (b.data.publishDate?.getTime() || 0) - (a.data.publishDate?.getTime() || 0));
+    } else if (sortBy === 'updateDate') {
+      result.sort((a, b) => (b.data.updateDate?.getTime() || 0) - (a.data.updateDate?.getTime() || 0));
+    }
+    filteredPosts = result;
+    // 更新totalPages并重置当前页
+    const newTotalPages = Math.ceil(filteredPosts.length / pageSize);
+    window.updatePagination(newTotalPages);
+    currentPage = 1;
+    window.updatePage(1);
+  });
+
+  // 监听搜索过滤重置事件
+  window.addEventListener('searchFilterReset', (event) => {
+    filteredPosts = [...posts];
+    const newTotalPages = Math.ceil(filteredPosts.length / pageSize);
+    window.updatePagination(newTotalPages);
+    currentPage = 1;
+    window.updatePage(1);
+  });
+
+  // 监听Pagination组件的页码变化事件
+  window.addEventListener('pageChange', (event) => {
+    const newPage = event.detail.page;
+    window.updatePage(newPage);
+  });
+</script>

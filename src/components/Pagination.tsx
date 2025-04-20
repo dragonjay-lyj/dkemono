@@ -1,5 +1,10 @@
 import React, { useState } from 'react';
 
+// 扩展Window接口，添加updatePage属性以解决TypeScript类型错误
+interface CustomWindow extends Window {
+  updatePage?: (page: number) => void;
+}
+
 interface PaginationProps {
   totalPages: number;
   onPageChange?: (page: number) => void; // 可选属性，用于外部页面切换
@@ -14,9 +19,14 @@ const Pagination: React.FC<PaginationProps> = ({ totalPages, onPageChange }) => 
     if (onPageChange) {
       onPageChange(page);
     }
+    // 直接通过window对象调用updatePage函数，避免onPageChange不是函数的错误
+    const customWindow = window as CustomWindow;
+    if (typeof customWindow.updatePage === 'function') {
+      customWindow.updatePage(page);
+    } else {
+      console.warn('window.updatePage function not found. Ensure it is defined in the Astro page.');
+    }
     window.scrollTo(0, 0);
-    // 注意：当前分页切换仅更新本地状态，Astro页面数据不会自动切片。
-    // 要实现实际数据分页，可以通过Astro端点API获取当前页数据，或在前端使用React状态管理（如Redux）更新显示数据。
   };
 
   const handlePrevPage = () => {
@@ -52,12 +62,12 @@ const Pagination: React.FC<PaginationProps> = ({ totalPages, onPageChange }) => 
   };
 
   if (totalPages <= 0) {
-    return <div className="text-center my-6 text-gray-500 text-sm md:text-base">无可用页面</div>;
+    return <div className="text-center my-6 text-gray-500 text-xs xs:text-sm sm:text-base">No pages available</div>;
   }
 
   return (
     <div
-      className="flex justify-center gap-1 xs:gap-1.5 sm:gap-2 my-6"
+      className="flex flex-wrap justify-center gap-1 xs:gap-1.5 sm:gap-2 my-6"
       role="navigation"
       aria-label="Pagination for navigating through pages"
     >
@@ -132,7 +142,7 @@ const Pagination: React.FC<PaginationProps> = ({ totalPages, onPageChange }) => 
         aria-disabled={currentPage === totalPages}
         tabIndex={0}
       >
-        下一页
+        Next
       </button>
     </div>
   );
