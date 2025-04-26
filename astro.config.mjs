@@ -11,9 +11,13 @@ import mdx from '@astrojs/mdx';
 
 import vercel from '@astrojs/vercel';
 
+import robotsTxt from 'astro-robots-txt';
+
+import compressor from 'astro-compressor';
+
 // https://astro.build/config
 export default defineConfig({
-  integrations: [react(), sitemap(), mdx()],
+  integrations: [react(), sitemap(), mdx(), robotsTxt(), compressor()],
   site: 'https://kemono.dragonjay.top',
   vite: {
     plugins: [tailwindcss()]
