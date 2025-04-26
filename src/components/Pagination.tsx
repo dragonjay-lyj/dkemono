@@ -62,7 +62,7 @@ const Pagination: React.FC<PaginationProps> = ({ totalPages, onPageChange }) => 
   };
 
   if (totalPages <= 0) {
-    return <div className="text-center my-6 text-gray-500 text-xs xs:text-sm sm:text-base">No pages available</div>;
+    return <div className="text-center my-6 text-gray-500 text-xs xs:text-sm sm:text-base">无可用页面</div>;
   }
 
   return (
@@ -89,7 +89,7 @@ const Pagination: React.FC<PaginationProps> = ({ totalPages, onPageChange }) => 
         aria-disabled={currentPage === 1}
         tabIndex={0}
       >
-        Prev
+        上一页
       </button>
 
       {/* 页码按钮 */}
@@ -142,7 +142,7 @@ const Pagination: React.FC<PaginationProps> = ({ totalPages, onPageChange }) => 
         aria-disabled={currentPage === totalPages}
         tabIndex={0}
       >
-        Next
+        下一页
       </button>
     </div>
   );

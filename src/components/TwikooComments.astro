@@ -26,23 +26,23 @@ const { envId, region = 'ap-shanghai', path = 'location.pathname', lang = 'zh-CN
     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 xs:h-6 xs:w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 animate-spin text-blue-500 mb-1 xs:mb-2 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
     </svg>
-    <p>Loading comments...</p>
+    <p>正在载入评论...</p>
   </div>
   <!-- 错误提示区域，Twikoo初始化失败时显示，添加渐显效果 -->
   <div id="twikoo-error" class="text-center text-gray-500 text-xs xs:text-sm sm:text-base py-4 hidden animate-fade-in-error">
-    <p>Failed to load comments. Please try again later.</p>
+    <p>加载评论失败。请稍后再试。</p>
     <button
       id="twikoo-retry"
       class="mt-2 px-2 py-0.5 xs:px-3 xs:py-1 sm:px-4 sm:py-1.5 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 text-xs xs:text-sm hover:scale-105 focus:scale-105"
       aria-label="Retry loading comments"
       tabindex="0"
     >
-      Retry
+      重试
     </button>
   </div>
   <!-- 评论数量显示区域，初始化成功后动态更新 -->
   <div id="twikoo-count" class="text-center text-gray-500 text-xs xs:text-sm sm:text-base py-2 hidden">
-    <p>Comments loaded. Total: <span id="twikoo-comment-count">0</span></p>
+    <p>评论已加载。总计 <span id="twikoo-comment-count">0</span></p>
   </div>
   <!-- Twikoo评论内容将动态插入到此容器中 -->
 </div>

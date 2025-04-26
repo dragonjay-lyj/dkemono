@@ -57,7 +57,7 @@ const displayTags = tags && tags.length > 0 ? tags : [];
   <div class="w-full md:w-1/2 p-3 xs:p-4 md:p-6 bg-gray-50 flex flex-col justify-center transition-colors duration-300 hover:bg-gray-100 focus-within:bg-gray-100">
     <h2 class="text-lg xs:text-xl md:text-2xl font-bold mb-1 xs:mb-2 truncate" title={displayTitle}>{displayTitle}</h2>
     <p class="text-gray-600 text-xs xs:text-sm md:text-base mb-2 md:mb-4">
-      Published: {displayPublishDate ? displayPublishDate.toLocaleDateString() : 'N/A'}
+      发布于: {displayPublishDate ? displayPublishDate.toLocaleDateString() : 'N/A'}
     </p>
     <div class="flex flex-wrap gap-1 xs:gap-1.5 md:gap-2">
       {displayTags.length > 0 ? (
