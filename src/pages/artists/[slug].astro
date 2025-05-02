@@ -29,6 +29,8 @@ const totalPages = Math.ceil(totalItems / itemsPerPage);
 
 // 确保初始页在有效范围内
 const validatedPage = Math.max(1, Math.min(initialPage, totalPages));
+
+export const prerender = true;
 ---
 
 <MainLayout title={artist.data.name} description={`探索 ${artist.data.name} 的作品`}>
