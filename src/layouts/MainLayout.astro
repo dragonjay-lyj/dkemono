@@ -1,0 +1,109 @@
+---
+import Header from '../components/common/Header.astro';
+import Footer from '../components/common/Footer.astro';
+const { title, description } = Astro.props;
+import "../styles/global.css";
+---
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title} | Artist Gallery</title>
+    <meta name="description" content={description} />
+    <meta name="robots" content="index, follow" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/images/logo.png" />
+    <meta property="og:site_name" content="Artist Gallery" />
+    <link rel="canonical" href={Astro.url} />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css"
+    />
+    <!-- 预加载关键字体或图标资源，提升加载性能 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+  </head>
+  <body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col transition-colors duration-500 dark:bg-gray-900 dark:text-gray-200">
+    <Header />
+    <main class="flex-1 transition-all duration-300">
+      <div class="">
+        <slot />
+      </div>
+    </main>
+    <script type="module">
+      import { Fancybox } from "https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.esm.js";
+
+      // 初始化 Fancybox，绑定图片预览
+      Fancybox.bind('[data-fancybox="gallery"]', {
+        Toolbar: {
+          display: {
+            left: ["infobar"],
+            middle: [],
+            right: ["slideshow", "fullscreen", "thumbs", "close"],
+          },
+        },
+        Images: {
+          Panzoom: {
+            maxScale: 2,
+          },
+        },
+        Thumbs: {
+          type: "classic",
+        },
+        transition: "fade",
+        animationEffect: "zoom-in-out",
+        animationDuration: 300,
+      });
+
+      // 优化：添加错误处理
+      if (!Fancybox) {
+        console.error('Fancybox failed to load.');
+      }
+    </script>
+    <!-- 页面加载时添加平滑滚动效果 -->
+    <script>
+      // 平滑滚动到页面顶部或指定位置
+      document.addEventListener('DOMContentLoaded', () => {
+        // 如果页面有哈希，平滑滚动到指定位置
+        if (window.location.hash) {
+          setTimeout(() => {
+            const target = document.querySelector(window.location.hash);
+            if (target) {
+              target.scrollIntoView({ behavior: 'smooth' });
+            }
+          }, 100); // 延迟以确保 DOM 完全加载
+        }
+      });
+    </script>
+    <style>
+      /* 自定义 Fancybox 样式以匹配主题 */
+      .fancybox-container {
+        font-family: inherit;
+      }
+      .fancybox-caption {
+        background: rgba(0, 0, 0, 0.85);
+        color: white;
+        padding: 15px 20px;
+        font-size: 1rem;
+        line-height: 1.5;
+      }
+      .fancybox-toolbar {
+        background: rgba(0, 0, 0, 0.6);
+      }
+      .fancybox-button {
+        background: transparent;
+        color: white;
+        transition: transform 0.2s ease, color 0.2s ease;
+      }
+      .fancybox-button:hover {
+        color: #3b82f6;
+        transform: scale(1.1);
+      }
+    </style>
+  </body>
+</html>

@@ -1,23 +1,25 @@
-import { defineCollection, z } from "astro:content";
+import { defineCollection, z } from 'astro:content';
+
+const artistSchema = z.object({
+  name: z.string(),
+  avatar: z.string(),
+  cover: z.string(),
+  service: z.enum(['Patreon', 'Fanbox', 'Gumroad']),
+  serviceUrl: z.string().url().optional(), // 画师服务页面链接
+  bio: z.string().optional(), // 画师简介
+});
+
+const postSchema = z.object({
+  title: z.string(),
+  cover: z.string(),
+  artist: z.string(), // 关联画师名称
+  publishDate: z.date(),
+  updateDate: z.date().optional(),
+  tags: z.array(z.string()).default([]), // 帖子标签
+  attachments: z.number(), // 附件数量
+});
 
 export const collections = {
-  artists: defineCollection({
-    schema: z.object({
-      name: z.string(), // Artist's name, required
-      avatar: z.string(), // URL to artist's avatar image, required
-      cover: z.string(), // URL to artist's cover image, required
-      service: z.enum(["Patreon", "Fanbox", "Gumroad"]), // Service platform, required
-    }),
-  }),
-  posts: defineCollection({
-    schema: z.object({
-      title: z.string(), // Post title, required
-      cover: z.string(), // URL to post cover image, required
-      artist: z.string(), // Associated artist name, required
-      publishDate: z.date(), // Post publish date, required
-      updateDate: z.date().optional(), // Post update date, optional
-      tags: z.array(z.string()).default([]), // Tags for categorization, default to empty array
-      attachments: z.number().default(0), // Number of attachments, default to 0
-    }),
-  }),
+  artists: defineCollection({ schema: artistSchema }),
+  posts: defineCollection({ schema: postSchema }),
 };

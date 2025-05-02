@@ -1,0 +1,108 @@
+---
+const { artist, post } = Astro.props || {};
+const { name, avatar, cover } = artist || {};
+const { title, publishDate, tags = [] } = post || {};
+
+// 限制标签数量（最多 3 个）
+const previewTags = tags.slice(0, 3);
+
+// 为标签动态选择背景颜色（基于索引）
+const getTagColor = (index: number) => {
+  const colors = [
+    'bg-blue-600 hover:bg-blue-500', // 蓝色
+    'bg-emerald-600 hover:bg-emerald-500', // 绿色
+    'bg-indigo-600 hover:bg-indigo-500', // 紫色
+  ];
+  return colors[index % colors.length];
+};
+---
+
+<div class="flex flex-col md:flex-row bg-gray-900 rounded-xl overflow-hidden shadow-lg h-52 w-full mb-6 transition-all duration-500 hover:shadow-2xl hover:-translate-y-1 group">
+  <!-- 左部分：画师封面和信息 -->
+  <div class="w-full md:w-1/2 h-52 relative">
+    <img
+      src={cover}
+      alt={`${name} 的封面`}
+      class="object-cover w-full h-full opacity-70 transition-opacity duration-700 group-hover:opacity-50"
+      loading="lazy"
+      decoding="async"
+      width="600"
+      height="400"
+      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+      srcset={`${cover}?w=300 300w, ${cover}?w=600 600w, ${cover}?w=900 900w`}
+    />
+    <!-- 渐变遮罩 -->
+    <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-70"></div>
+    <div class="absolute bottom-4 left-4 md:bottom-6 md:left-6 flex flex-col items-start">
+      <div class="w-12 h-12 md:w-14 md:h-14 rounded-full border-3 border-white/80 overflow-hidden shadow-md transition-transform duration-300 hover:scale-110">
+        <img
+          src={avatar}
+          alt={`${name} 的头像`}
+          class="object-cover w-full h-full transition-opacity duration-300 group-hover:opacity-90"
+          loading="lazy"
+          decoding="async"
+          width="56"
+          height="56"
+        />
+      </div>
+      <a
+        href={`/artists/${name.toLowerCase().replace(/\s+/g, '-')}`}
+        class="mt-2 text-white text-base md:text-lg font-bold hover:text-blue-300 transition-colors duration-300"
+        aria-label={`查看 ${name} 的画师页面`}
+      >
+        {name}
+      </a>
+    </div>
+  </div>
+
+  <!-- 右部分：帖子信息 -->
+  <div class="w-full md:w-1/2 p-4 md:p-5 flex flex-col justify-between bg-gray-800/90 transition-colors duration-500 group-hover:bg-gray-800/80">
+    <div>
+      <h3 class="text-white text-xl md:text-2xl font-bold mb-2 tracking-tight transition-colors duration-300 group-hover:text-blue-300 line-clamp-2">
+        {title}
+      </h3>
+      <p class="text-gray-300 text-sm md:text-base transition-colors duration-300 group-hover:text-gray-200">
+        发布时间: {publishDate.toLocaleDateString()}
+      </p>
+    </div>
+    <!-- 标签预览 -->
+    {
+      previewTags.length > 0 && (
+        <div class="flex flex-wrap gap-1.5 mt-3 md:mt-4">
+          {previewTags.map((tag, index) => (
+            <a
+              href={`/tags/${tag.toLowerCase().replace(/\s+/g, '-')}`}
+              class={`text-white text-xs md:text-sm px-2 md:px-3 py-0.5 rounded-full transition-all duration-200 tag-filter transform hover:scale-105 ${getTagColor(index)}`}
+              aria-label={`查看标签：${tag} 的相关帖子`}
+              data-tag={tag}
+            >
+              {tag}
+            </a>
+          ))}
+        </div>
+      )
+    }
+  </div>
+</div>
+
+<!-- 客户端脚本：实现标签筛选功能 -->
+<script>
+  // 为所有标签链接添加筛选逻辑
+  document.querySelectorAll('.tag-filter').forEach((tagLink) => {
+    tagLink.addEventListener('click', function (event) {
+      event.preventDefault(); // 阻止默认链接跳转
+      const tag = this.getAttribute('data-tag');
+      if (tag) {
+        // 触发全局筛选逻辑
+        console.log(`Filtering posts by tag: ${tag}`);
+        // 将标签添加到 URL 参数以触发搜索
+        const params = new URLSearchParams(window.location.search);
+        params.set('tag', tag);
+        window.history.pushState({}, '', `${window.location.pathname}?${params.toString()}`);
+        // 触发自定义事件以通知其他组件进行筛选
+        const filterEvent = new CustomEvent('filterByTag', { detail: { tag } });
+        window.dispatchEvent(filterEvent);
+      }
+    });
+  });
+</script>

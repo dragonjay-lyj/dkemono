@@ -1,0 +1,160 @@
+---
+const { prev, next } = Astro.props;
+---
+
+<div class="flex justify-between mb-6 sm:mb-8 md:mb-10 px-2 sm:px-4">
+  <!-- 上一页按钮 -->
+  {
+    prev ? (
+      <a
+        href={prev.slug}
+        class="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-white text-gray-800 rounded-full shadow-md hover:bg-blue-500 hover:text-white transition-all duration-300 transform hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        aria-label="上一帖子"
+        data-loading="false"
+      >
+        <span class="flex items-center justify-center">
+          <span class="mr-1 sm:mr-1.5 md:mr-2 w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6">
+            <!-- 自定义上一页图标：带有圆圈背景的箭头 -->
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+              class="transition-transform duration-300 group-hover:-translate-x-1"
+            >
+              <circle cx="12" cy="12" r="10" stroke-opacity="0.5" />
+              <path d="M15 16l-4-4 4-4" />
+            </svg>
+          </span>
+          <span class="hidden sm:inline text-sm md:text-base font-medium">上一页</span>
+        </span>
+        <span class="loading-spinner hidden absolute w-4 h-4 sm:w-5 sm:h-5 border-2 border-gray-800 border-t-transparent rounded-full animate-spin"></span>
+      </a>
+    ) : (
+      <span
+        class="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-gray-200 text-gray-400 rounded-full shadow-sm cursor-not-allowed opacity-70"
+        aria-label="上一帖子（不可用）"
+      >
+        <span class="mr-1 sm:mr-1.5 md:mr-2 w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6">
+          <!-- 自定义上一页图标：带有圆圈背景的箭头（禁用状态） -->
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <circle cx="12" cy="12" r="10" stroke-opacity="0.3" />
+            <path d="M15 16l-4-4 4-4" />
+          </svg>
+        </span>
+        <span class="hidden sm:inline text-sm md:text-base font-medium">上一页</span>
+      </span>
+    )
+  }
+
+  <!-- 下一页按钮 -->
+  {
+    next ? (
+      <a
+        href={next.slug}
+        class="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-white text-gray-800 rounded-full shadow-md hover:bg-blue-500 hover:text-white transition-all duration-300 transform hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        aria-label="下一帖子"
+        data-loading="false"
+      >
+        <span class="flex items-center justify-center">
+          <span class="hidden sm:inline text-sm md:text-base font-medium">下一页</span>
+          <span class="ml-1 sm:ml-1.5 md:ml-2 w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6">
+            <!-- 自定义下一页图标：带有圆圈背景的箭头 -->
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+              class="transition-transform duration-300 group-hover:translate-x-1"
+            >
+              <circle cx="12" cy="12" r="10" stroke-opacity="0.5" />
+              <path d="M9 16l4-4-4-4" />
+            </svg>
+          </span>
+        </span>
+        <span class="loading-spinner hidden absolute w-4 h-4 sm:w-5 sm:h-5 border-2 border-gray-800 border-t-transparent rounded-full animate-spin"></span>
+      </a>
+    ) : (
+      <span
+        class="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-gray-200 text-gray-400 rounded-full shadow-sm cursor-not-allowed opacity-70"
+        aria-label="下一帖子（不可用）"
+      >
+        <span class="hidden sm:inline text-sm md:text-base font-medium">下一页</span>
+        <span class="ml-1 sm:ml-1.5 md:ml-2 w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6">
+          <!-- 自定义下一页图标：带有圆圈背景的箭头（禁用状态） -->
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <circle cx="12" cy="12" r="10" stroke-opacity="0.3" />
+            <path d="M9 16l4-4-4-4" />
+          </svg>
+        </span>
+      </span>
+    )
+  }
+</div>
+
+<!-- 加载动画和交互逻辑 -->
+<script>
+  // 为所有导航链接添加加载动画
+  document.querySelectorAll('a[data-loading]').forEach((link) => {
+    link.addEventListener('click', function (event) {
+      // 显示加载动画
+      const spinner = this.querySelector('.loading-spinner') as HTMLElement;
+      const content = this.querySelector('span:not(.loading-spinner)') as HTMLElement;
+      if (spinner && content) {
+        spinner.classList.remove('hidden');
+        content.classList.add('hidden');
+        // 模拟加载状态（实际加载由页面导航控制）
+        setTimeout(() => {
+          spinner.classList.add('hidden');
+          content.classList.remove('hidden');
+        }, 800); // 调整加载动画持续时间为 800ms
+      }
+    });
+  });
+</script>
+
+<style>
+  /* Tailwind 无法直接应用于动态内容，定义加载动画 */
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  .animate-spin {
+    animation: spin 1s linear infinite;
+  }
+</style>
